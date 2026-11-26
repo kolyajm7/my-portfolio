@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Fantasy Frame Studio — Portfolio</title>
+<style>
+  :root{
+    --bg:#0b0d12; --panel:#12161f; --panel2:#1a2030;
+    --accent:#e8b64c; --accent2:#7fb2ff; --text:#e8ecf4; --muted:#9aa4b8;
+    --line:rgba(255,255,255,.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Segoe UI','Noto Sans KR','Noto Sans JP',sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.7; overflow-x:hidden;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+
+  #langBar{
+    position:fixed; top:14px; right:14px; z-index:1000; display:flex; gap:4px;
+    background:rgba(10,12,18,.75); backdrop-filter:blur(8px);
+    padding:5px; border-radius:999px; border:1px solid var(--line);
+  }
+  #langBar button{
+    background:transparent; color:var(--muted); border:none; cursor:pointer;
+    padding:6px 11px; border-radius:999px; font-size:12px; font-weight:600; transition:.2s;
+    white-space:nowrap;
+  }
+  #langBar button.active{background:var(--accent); color:#111;}
+
+  .hero{
+    position:relative; min-height:100vh; min-height:100svh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; text-align:center; padding:70px 20px;
+    overflow:hidden;
+  }
+  .hero .bg{
+    position:absolute; inset:0; z-index:0;
+    background-size:cover; background-position:center;
+    opacity:.45; filter:saturate(.9);
+  }
+  .hero .bg::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(11,13,18,.4), var(--bg));
+  }
+  .hero .content{position:relative; z-index:2; max-width:900px;}
+  .hero h1{
+    font-size:clamp(2rem,7vw,4.4rem); line-height:1.15; letter-spacing:-1px;
+    background:linear-gradient(90deg,var(--accent),#fff,var(--accent2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero .sub{margin-top:20px; color:var(--muted); font-size:clamp(.95rem,2.4vw,1.2rem);}
+  .hero .quote{margin-top:36px; font-style:italic; color:var(--accent); font-size:clamp(.85rem,2vw,1.05rem);}
+
+  section{position:relative; padding:70px 6vw; border-top:1px solid var(--line);}
+  section .sec-bg{
+    position:absolute; inset:0; z-index:0; background-size:cover; background-position:center;
+    opacity:.12; filter:blur(2px);
+  }
+  section .sec-bg::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg,var(--bg),transparent 30%,transparent 70%,var(--bg));}
+  .sec-inner{position:relative; z-index:2; max-width:1200px; margin:0 auto;}
+  .sec-label{
+    display:inline-block; font-size:.75rem; letter-spacing:3px; text-transform:uppercase;
+    color:var(--accent); border:1px solid var(--accent); padding:4px 14px; border-radius:999px;
+    margin-bottom:18px;
+  }
+  h2{font-size:clamp(1.5rem,4vw,2.6rem); margin-bottom:22px; line-height:1.25;}
+  p{color:#c8d0e0; margin-bottom:14px; font-size:clamp(.92rem,2vw,1rem);}
+  .muted{color:var(--muted);}
+
+  .founder{display:grid; grid-template-columns:1fr 1.2fr; gap:48px; align-items:center;}
+  @media(max-width:820px){.founder{grid-template-columns:1fr; gap:28px;}}
+  .founder .portrait{
+    border-radius:20px; overflow:hidden; border:1px solid var(--line);
+    box-shadow:0 20px 60px rgba(0,0,0,.5); aspect-ratio:3/4; background:#000;
+    max-width:420px; margin:0 auto;
+  }
+  .founder .portrait img{width:100%; height:100%; object-fit:cover;}
+
+  .card-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin-top:30px;}
+  .card{
+    background:linear-gradient(160deg,var(--panel2),var(--panel));
+    border:1px solid var(--line); border-radius:18px; padding:24px;
+    cursor:pointer; transition:.25s; position:relative; overflow:hidden;
+  }
+  .card::before{
+    content:''; position:absolute; inset:0; opacity:0; transition:.3s;
+    background:radial-gradient(circle at 30% 20%,rgba(232,182,76,.25),transparent 60%);
+  }
+  .card:hover{transform:translateY(-4px); border-color:var(--accent);}
+  .card:hover::before{opacity:1;}
+  .card h3{font-size:1.1rem; margin-bottom:8px; color:#fff; position:relative; padding-right:32px;}
+  .card p{font-size:.9rem; margin:0; position:relative;}
+  .card .arrow{position:absolute; right:20px; bottom:18px; color:var(--accent); font-size:1.4rem; transition:.3s;}
+  .card:hover .arrow{transform:translateX(4px);}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(5,7,11,.9); backdrop-filter:blur(10px);
+    z-index:2000; display:none; align-items:flex-start; justify-content:center;
+    padding:24px 12px; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--panel); border:1px solid var(--line); border-radius:20px;
+    max-width:1200px; width:100%; padding:clamp(18px,4vw,32px); position:relative;
+    animation:pop .3s ease; margin:auto;
+  }
+  @keyframes pop{from{opacity:0; transform:translateY(20px) scale(.98);} to{opacity:1; transform:none;}}
+  .modal-close{
+    position:absolute; top:12px; right:14px; background:var(--panel2); color:#fff;
+    border:1px solid var(--line); width:40px; height:40px; border-radius:50%;
+    cursor:pointer; font-size:1.1rem; transition:.2s; z-index:5;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .modal-close:hover{background:var(--accent); color:#111;}
+  .modal h3{font-size:clamp(1.2rem,3.5vw,1.5rem); margin-bottom:6px; color:var(--accent); padding-right:50px;}
+  .modal .modal-sub{color:var(--muted); font-size:.88rem; margin-bottom:22px;}
+
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px;}
+  @media(max-width:480px){.cat-grid{grid-template-columns:repeat(2,1fr);}}
+  .cat-btn{
+    background:var(--panel2); border:1px solid var(--line); border-radius:14px;
+    padding:16px 14px; cursor:pointer; transition:.2s; text-align:left; color:var(--text);
+    font-size:.92rem; font-weight:600; font-family:inherit;
+  }
+  .cat-btn:hover{background:var(--accent); color:#111; border-color:var(--accent);}
+  .cat-btn small{display:block; font-weight:400; opacity:.7; font-size:.72rem; margin-top:4px;}
+
+  .gallery{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; margin-top:8px;}
+  @media(max-width:640px){.gallery{grid-template-columns:1fr; gap:12px;}}
+  .gallery .item{
+    border-radius:14px; overflow:hidden; background:#000; border:1px solid var(--line);
+    aspect-ratio:16/10; display:flex; align-items:center; justify-content:center;
+    position:relative; cursor:zoom-in;
+  }
+  .gallery .item video{cursor:default;}
+  .gallery .item img,.gallery .item video{
+    width:100%; height:100%; object-fit:contain; background:#000; display:block;
+  }
+  .gallery .item img{cursor:zoom-in;}
+  .gallery .item .zoom-hint{
+    position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,.65); color:#fff;
+    font-size:.7rem; padding:3px 8px; border-radius:999px; pointer-events:none;
+    opacity:0; transition:.2s;
+  }
+  .gallery .item:hover .zoom-hint{opacity:1;}
+
+  /* ★ 실례 구분 블록 */
+  .example-group{margin-top:28px;}
+  .example-group:first-of-type{margin-top:8px;}
+  .example-header{
+    font-size:1rem; font-weight:700; color:var(--accent);
+    padding:10px 0; border-bottom:1px solid var(--line); margin-bottom:14px;
+    letter-spacing:1px;
+  }
+  /* 실례 그룹 내부: 가로로 나란히 */
+  .block-gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:14px;
+  }
+  @media(max-width:640px){
+    .block-gallery{grid-template-columns:1fr; gap:12px;}
+  }
+  .block-item{
+    border-radius:14px; overflow:hidden; background:#000; border:1px solid var(--line);
+    aspect-ratio:16/10; display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .block-item .block-media{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  }
+  .block-item .block-media img,
+  .block-item .block-media video{
+    width:100%; height:100%; object-fit:contain; background:#000; display:block;
+  }
+  .block-item .block-media img{cursor:zoom-in;}
+
+  /* ★ 스크롤 고정 뒤로 버튼 */
+.back-btn-wrap{
+  position:sticky; top:0; z-index:10;
+  width:fit-content;
+  background:transparent;
+  padding:8px 0;
+  margin:0 0 14px 0;
+}
+.back-btn{
+  background:var(--panel2); border:1px solid var(--line); color:var(--muted);
+  padding:8px 16px; border-radius:999px; cursor:pointer; font-size:.85rem;
+  font-family:inherit;
+}
+.back-btn:hover{color:var(--accent); border-color:var(--accent);}
+
+  #fsViewer{
+    position:fixed; inset:0; z-index:5000; background:rgba(0,0,0,.97);
+    display:none; align-items:center; justify-content:center; padding:20px;
+    animation:fadeIn .2s ease;
+  }
+  #fsViewer.open{display:flex;}
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+  #fsViewer img{
+    max-width:100%; max-height:100%; object-fit:contain;
+    user-select:none; -webkit-user-drag:none;
+  }
+  #fsViewer .fs-close{
+    position:absolute; top:16px; right:16px; background:rgba(255,255,255,.12); color:#fff;
+    border:none; width:46px; height:46px; border-radius:50%; cursor:pointer;
+    font-size:1.3rem; display:flex; align-items:center; justify-content:center;
+    transition:.2s; z-index:10;
+  }
+  #fsViewer .fs-close:hover{background:var(--accent); color:#111;}
+  #fsViewer .fs-nav{
+    position:absolute; top:50%; transform:translateY(-50%);
+    background:rgba(255,255,255,.12); color:#fff; border:none;
+    width:50px; height:50px; border-radius:50%; cursor:pointer; font-size:1.4rem;
+    display:flex; align-items:center; justify-content:center; transition:.2s; z-index:10;
+  }
+  #fsViewer .fs-nav:hover{background:var(--accent); color:#111;}
+  #fsViewer .fs-prev{left:16px;}
+  #fsViewer .fs-next{right:16px;}
+  #fsViewer .fs-counter{
+    position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+    color:#fff; background:rgba(255,255,255,.12); padding:6px 16px; border-radius:999px;
+    font-size:.85rem;
+  }
+  @media(max-width:640px){
+    #fsViewer .fs-nav{width:42px; height:42px; font-size:1.2rem;}
+    #fsViewer .fs-prev{left:8px;} #fsViewer .fs-next{right:8px;}
+    #fsViewer .fs-close{top:10px; right:10px; width:42px; height:42px;}
+  }
+
+  footer{text-align:center; padding:60px 20px; border-top:1px solid var(--line); color:var(--muted); font-size:.9rem;}
+  footer .motto{color:var(--accent); font-style:italic; margin-top:10px; max-width:800px; margin-left:auto; margin-right:auto;}
+
+  .pill-list{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .pill{
+    background:var(--panel2); border:1px solid var(--line); padding:7px 14px;
+    border-radius:999px; font-size:.82rem; color:var(--text); text-decoration:none;
+    transition:.2s; cursor:pointer;
+  }
+  .pill:hover{
+    background:var(--accent); color:#111; border-color:var(--accent);
+    transform:translateY(-1px);
+  }
+
+  @media(max-width:640px){
+    section{padding:55px 20px;}
+    .hero{padding:60px 18px;}
+    #langBar{top:10px; right:10px; padding:4px;}
+    #langBar button{padding:5px 8px; font-size:11px;}
+    .card{padding:20px;}
+    .modal{padding:20px 16px; border-radius:16px;}
+    .modal-overlay{padding:12px 8px;}
+    .gallery .item{aspect-ratio:4/3;}
+    .block-item .block-media{min-height:120px; padding:10px;}
+    .example-header{font-size:.92rem;}
+  }
+  @media(hover:none){
+    .card:hover{transform:none;}
+    .pill:hover{transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="langBar">
+  <button data-lang="en" class="active">English</button>
+  <button data-lang="ru">Русский</button>
+  <button data-lang="zh">中文</button>
+  <button data-lang="jp">日本語</button>
+  <button data-lang="ko">korean</button>
+</div>
+
+<header class="hero">
+  <div class="bg" id="heroBg"></div>
+  <div class="content">
+    <h1 data-i18n="heroTitle">Fantasy Frame Studio</h1>
+    <p class="sub" data-i18n="heroSub">With human hands, we breathe soul into every frame.</p>
+    <p class="quote" data-i18n="heroQuote">“Fantasy fades if it stays only in the mind. It only comes alive when captured in frames.”</p>
+  </div>
+</header>
+
+<section id="company">
+  <div class="sec-bg" id="companyBg"></div>
+  <div class="sec-inner">
+    <span class="sec-label" data-i18n="labelCompany">01 · Company</span>
+    <h2 data-i18n="companyTitle">Company Introduction</h2>
+    <p data-i18n="companyP1">A workshop that captures a world of fantasy, frame by frame.</p>
+    <p class="muted" data-i18n="companyP2">Fantasy — Not mere imagination. The ability to create a world that doesn't exist but could plausibly exist.</p>
+    <p class="muted" data-i18n="companyP3">Frame — 24 drawings per second. That 1/24th of a second; each one gathered breathes life into a character.</p>
+    <p class="muted" data-i18n="companyP4">Studio — A space where dozens of professionals each at their station craft a single film together.</p>
+  </div>
+</section>
+
+<section id="founder">
+  <div class="sec-bg" id="founderBg"></div>
+  <div class="sec-inner">
+    <span class="sec-label" data-i18n="labelFounder">02 · Founder</span>
+    <h2 data-i18n="founderTitle">The Founder's Story</h2>
+    <div class="founder">
+      <div class="portrait"><img id="managerImg" alt="Founder"></div>
+      <div>
+        <p data-i18n="founderP1">In 2017, with one digital tablet, two boxes of storyboards, and six like-minded people, Hwan Frame was founded in an old workspace.</p>
+        <p data-i18n="founderP2">Years later, that small space — where we even conserved air conditioning — has grown into a team of nearly dozens of accomplished animation professionals.</p>
+        <p data-i18n="founderP3">I still maintain one habit: I personally draw the first concept sketch for every project.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="commissions">
+  <div class="sec-bg" id="commBg"></div>
+  <div class="sec-inner">
+    <span class="sec-label" data-i18n="labelComm">03 · Commissions</span>
+    <h2 data-i18n="commTitle">Domestic & International Commissions</h2>
+    <p data-i18n="commP1">Hwan Frame undertakes various animation production commissions both domestically and internationally. The majority of orders are for 2D animation, and we also actively operate part-by-part ordering. In addition, we are also accepting orders for special effects (VFX) for film production and 2D pixel art and dot art.</p>
+    <div class="card-grid">
+      <div class="card" onclick="openCategoryModal()">
+        <h3 data-i18n="cardParts">Animation Part Order Categories</h3>
+        <p data-i18n="cardPartsDesc">11 specialized categories — click to explore</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="card" onclick="openMediaModal('vfx')">
+        <h3 data-i18n="cardVfx">Film VFX Commissions</h3>
+        <p data-i18n="cardVfxDesc">Nuke · Silhouette · Houdini based VFX</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="card" onclick="openMediaModal('pixelart')">
+        <h3 data-i18n="cardPixel">2D Pixel Art / Dot Commissions</h3>
+        <p data-i18n="cardPixelDesc">Monster dots · Set dots · GIF gallery</p>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="core">
+  <div class="sec-bg" id="coreBg"></div>
+  <div class="sec-inner">
+    <span class="sec-label" data-i18n="labelCore">04 · Core</span>
+    <h2 data-i18n="coreTitle">Our Core: “The Power of Drawing by Hand”</h2>
+    <p data-i18n="coreP1">Hwan Frame's greatest asset is its nearly dozens of animation professionals. Key animators, in-between animators, animation directors, background artists, and compositing specialists each handle their own fields.</p>
+    <p data-i18n="coreP2">Our most distinct strength is our capability in traditional hand-drawn concept art. Hand-drawn concept art does not simply mean “drawing by hand.” It is a creative act of directly controlling a character’s breath, center, and the subtle tremors of their emotions frame by frame.</p>
+  </div>
+</section>
+
+<section id="ai">
+  <div class="sec-inner">
+    <span class="sec-label" data-i18n="labelAi">05 · Trend</span>
+    <h2 data-i18n="aiTitle">AI Is Powerful, but Two Hands Cannot Be Replaced</h2>
+    <p data-i18n="aiP1">In 2025, the AI penetration rate among surveyed animation companies in China reached 90.3%, and more than half officially adopted AI tools in production.</p>
+    <p data-i18n="aiP2">However, generative AI has made remarkable progress in visual realism but is difficult to replace human animators in the field of 'acting' — the core of character animation.</p>
+    <p data-i18n="aiP3">AI is a capable assistant at our workbench, but what ultimately determines whether a character is 'alive' is still the animator's hands, eyes, and judgment.</p>
+  </div>
+</section>
+
+<!-- ★ 도구 링크 수정: 실제 다운로드 가능 페이지로 연결 -->
+<section id="tools">
+  <div class="sec-inner">
+    <span class="sec-label" data-i18n="labelTools">06 · Tools</span>
+    <h2 data-i18n="toolsTitle">The Tools in Our Hands</h2>
+    <div class="pill-list">
+      <a class="pill" href="https://www.clipstudio.net/tc/dl/latest/" target="_blank" rel="noopener">Clip Studio Paint EX</a>
+      <a class="pill" href="https://www.clip-studio.com/clip_site/tool/items/rs_d_plan" target="_blank" rel="noopener">RETAS Studio</a>
+      <a class="pill" href="https://moho.lostmarble.com/pages/download-moho-14" target="_blank" rel="noopener">Moho Pro</a>
+      <a class="pill" href="https://opentoonz.github.io/e/index.html" target="_blank" rel="noopener">OpenToonz</a>
+      <a class="pill" href="https://www.toonboom.com/products/harmony" target="_blank" rel="noopener">Toon Boom Harmony</a>
+      <a class="pill" href="https://www.adobe.com/products/aftereffects.html" target="_blank" rel="noopener">After Effects</a>
+      <a class="pill" href="https://www.tvpaint.com/" target="_blank" rel="noopener">TVPaint</a>
+      <a class="pill" href="https://www.blender.org/download/" target="_blank" rel="noopener">Blender Grease Pencil</a>
+      <a class="pill" href="https://www.cosmigo.com/pixel_animation_software/downloads" target="_blank" rel="noopener">Pro Motion</a>
+      <a class="pill" href="https://www.autodesk.com/products/maya/overview" target="_blank" rel="noopener">Maya</a>
+      <a class="pill" href="https://www.maxon.net/en/zbrush" target="_blank" rel="noopener">ZBrush</a>
+      <a class="pill" href="https://www.sidefx.com/get/try-houdini/" target="_blank" rel="noopener">Houdini</a>
+      <a class="pill" href="https://www.autodesk.com/products/arnold/overview" target="_blank" rel="noopener">Arnold / RenderMan</a>
+      <a class="pill" href="https://www.unrealengine.com/en-US/download" target="_blank" rel="noopener">Unreal Engine</a>
+      <a class="pill" href="https://www.foundry.com/products/nuke-family/nuke" target="_blank" rel="noopener">Nuke</a>
+      <a class="pill" href="https://borisfx.com/products/silhouette/" target="_blank" rel="noopener">Silhouette</a>
+      <a class="pill" href="https://www.autodesk.com/products/flow-production-tracking/overview" target="_blank" rel="noopener">Flow Production Tracking</a>
+    </div>
+    <p data-i18n="toolsP1">----- </p>
+    <p data-i18n="toolsP2">These are 2D and 3D animation production tools, movie VFX production tools, and 2D pixel art and dot production tools. You can directly download and install the necessary tools.</p>
+    <p data-i18n="toolsP3">Clip StudioPaint and RETAS Studio are our team's primary production tools. While CSP excels in hand-drawn original artwork, intermediate drawings, and storyboarding, RETAS demonstrates strength in mass production and the division of labor that extends from line art and coloring to photography. We strategically combine and utilize these two core tools depending on the nature of the project.</p>
+    <p data-i18n="toolsP4">Moho (also known as Anime Studio) is 2D animation software that we use as an auxiliary tool in specific projects.</p>
+  </div>
+</section>
+
+<section id="education">
+  <div class="sec-inner">
+    <span class="sec-label" data-i18n="labelEdu">07 · Education</span>
+    <h2 data-i18n="eduTitle">Independent Education System: Keeping Skills Unbroken</h2>
+    <p data-i18n="eduP1">In-house training program — step-by-step curricula from new animators to veterans, based on a mentor-apprentice system across key animation, in-between, background, and compositing.</p>
+    <p data-i18n="eduP2">Hand-drawn key animation succession project — veteran key animators personally teach young people in a permanently operated program.</p>
+    <p data-i18n="eduP3">External workshops, online learning content, and internship acceptance promote skill improvement across the entire team.</p>
+    <p data-i18n="eduP4">This educational system is not merely about teaching technology. It is also a venue for conveying to the next generation the philosophy of work of *Circular Frame*: 'Breathing a soul into every frame with human hands.' No matter how advanced AI becomes, education by humans is indispensable to cultivate its judgment and sensibility.</p>
+  </div>
+</section>
+
+<section id="works">
+  <div class="sec-bg" id="worksBg"></div>
+  <div class="sec-inner">
+    <span class="sec-label" data-i18n="labelWorks">08 · Works</span>
+    <h2 data-i18n="worksTitle">What Hwan Frame Delivers</h2>
+    <div class="card-grid">
+      <div class="card" onclick="openCategoryModal()">
+        <h3 data-i18n="workAnim">Animation Production</h3>
+        <p data-i18n="workAnimDesc">11-category gallery — click to explore</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="card" onclick="openMediaModal('vfx')">
+        <h3 data-i18n="workVfx">Film VFX Commissions</h3>
+        <p data-i18n="workVfxDesc">Nuke roto · paint work</p>
+        <span class="arrow">→</span>
+      </div>
+      <div class="card" onclick="openMediaModal('pixelart')">
+        <h3 data-i18n="workPixel">2D Pixel Art / Dot Commissions</h3>
+        <p data-i18n="workPixelDesc">Monster · Set dot GIFs</p>
+        <span class="arrow">→</span>
+      </div>
+    </div>
+    <p class="muted" style="margin-top:36px;" data-i18n="worksQuote">The founder says: “We are not just making works — we are cultivating the talent who will continue this work. That is our responsibility.”</p>
+  </div>
+</section>
+
+<footer>
+  <p>Fantasy Frame Studio · 幻フレーム</p>
+  <p class="motto">"Fantasy vanishes if it remains only in the mind. It only comes to life when captured within a frame. And as those frames come together, they become a single world."</p>
+  <p class="motto">"Фантазия исчезает, если остаётся только в уме. Она оживает, лишь когда её запечатлевают в кадре. И когда эти кадры собираются вместе, они становятся единым миром."</p>
+  <p class="motto">"幻想若只存在于脑海中，便会消逝。唯有将其捕捉于帧中，方能真正获得生命。而当这些帧汇聚在一起，便成为一个完整的世界。"</p>
+  <p class="motto">"幻想は頭の中だけにあれば消える。フレームで握らなければ初めて生き残る。そしてそのフレームが集まり、一つの世界になる。"</p>
+  <p class="motto">"환상은 머리속에만 있으면 사라진다. 프레임으로 붙잡아야 비로소 살아난다. 그리고 그 프레임이 모여, 하나의 세계가 된다."</p>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<div id="fsViewer" onclick="if(event.target===this)closeFullscreen()">
+  <button class="fs-close" onclick="closeFullscreen()">✕</button>
+  <button class="fs-nav fs-prev" onclick="fsPrev(event)">‹</button>
+  <button class="fs-nav fs-next" onclick="fsNext(event)">›</button>
+  <img id="fsImg" src="" alt="">
+  <div class="fs-counter" id="fsCounter"></div>
+</div>
+
+<script>
+const BASE = "https://github.com/kolyajm7/my-portfolio/releases/download/v1.0/";
+
+const BLOCK_GROUPS = {
+  background: [
+    { label:"lblSample:1", files:["back001.jpg","back002.jpg","back003.jpg","back004.jpg","back005.jpg","back006.jpg","back007.jpg","back008.jpg","back009.jpg","back0010.jpg","back0011.jpg","back0012.jpg","Backg_002.jpg","Backg_003.jpg","Backg_004.jpg","Backg_005.jpg","Backg_006.jpg","Backg_007.jpg"] },
+    { label:"lblSample:2", files:["1.jpg","2.jpg","3.jpg","4.jpg","5.jpg","6.jpg","7.jpg","8.jpg","9.jpg","10.jpg","11.jpg","12.jpg","13.jpg","14.jpg","15.jpg","16.jpg","17.jpg","18.jpg","19.jpg"] }
+  ],
+  sensation: [
+    { label:"lblSample:1", files:["10-A1_s.jpg","10-A2_s.jpg","10-A3_s.jpg","10-A4_s.jpg","10-A5_s.jpg","10-A6_s.jpg","10-A7_s.jpg","10-A8_s.jpg","10-A9_s.jpg","10-A10_s.jpg","10-A11_s.jpg","10-A12_s.jpg","10-A13_s.jpg","10-A14_s.jpg","10-A15_s.jpg"] },
+    { label:"lblSample:2", files:["1-L0002.jpg","1-L0002_s.jpg","1-L0003.jpg","1-L0003_s.jpg","1-L0004.jpg","1-L0004_s.jpg","1-L0005.jpg","1-L0005_s.jpg","1-L0006.jpg","1-L0006_s.jpg","1-L0007.jpg","1-L0007_s.jpg"] },
+    { label:"lblSample:3", files:["9-A1.jpg","9-A1_s.jpg","9-A2.jpg","9-A2_s.jpg","9-A3.jpg","9-A3_s.jpg","9-A4.jpg","9-A4_s.jpg","9-B1.jpg","9-B1_s.jpg"] },
+    { label:"lblSample:4", files:["8-A1_s.jpg","8-A3_s.jpg","8-A4_s.jpg","8-A5_s.jpg","8-A6_s.jpg","8-A8_s.jpg","8-A9_s.jpg","8-A10_s.jpg","8-A11_s.jpg","8-A13_s.jpg","8-A15_s.jpg","8-A16_s.jpg","8-A17_s.jpg","8-A19_s.jpg","8-A21_s.jpg","8-A24_s.jpg","8-B1_s.jpg","8-B2_s.jpg","8-B3_s.jpg","8-B4_s.jpg","8-B5_s.jpg","8-B6_s.jpg","8-B7_s.jpg","8-B8_s.jpg","8-B9_s.jpg","8-C1_s.jpg","8-C2_s.jpg","8-C3_s.jpg","8-C4_s.jpg","8-C5_s.jpg","8-C6_s.jpg","8-D1_s.jpg","8-D2_s.jpg","8-D3_s.jpg","8-E1_s.jpg","8-E2_s.jpg"] },
+    { label:"lblSample:5", files:["7-A1.jpg","7-A1_s.jpg","7-A2.jpg","7-A2_s.jpg","7-B1.jpg","7-B1_s.jpg","7-B2.jpg","7-B2_s.jpg","7-B3.jpg","7-B3_s.jpg","7-B4.jpg","7-B4_s.jpg","7-C1.jpg","7-C1_s.jpg","7-C2.jpg","7-C2_s.jpg","7-C3.jpg","7-C3_s.jpg","7-C3a.jpg","7-C3a_s.jpg","7-C4.jpg","7-C4_s.jpg","7-C5.jpg","7-C5_s.jpg","7-C6.jpg","7-C6_s.jpg","7-D1.jpg","7-D1_s.jpg","7-D2.jpg","7-D2_s.jpg","7-D3.jpg","7-D3_s.jpg","7-D4.jpg","7-D4_s.jpg","7-D5.jpg","7-D5_s.jpg","7-D6.jpg","7-D6_s.jpg","7-E1.jpg","7-E1_s.jpg","7-E2.jpg","7-E2_s.jpg","7-E3.jpg","7-E3_s.jpg","7-E4.jpg","7-E4_s.jpg","7-E5.jpg","7-E5_s.jpg","7-E6.jpg","7-E6_s.jpg"] },
+    { label:"lblSample:6", files:["6-A1_s.jpg","6-B1_s.jpg","6-B2_s.jpg"] },
+    { label:"lblSample:7", files:["5-A0.jpg","5-A1.jpg","5-A2.jpg","5-A3.jpg","5-A4.jpg","5-A5.jpg","5-A6.jpg","5-A7.jpg","5-A8.jpg","5-A9.jpg","5-A10.jpg"] },
+    { label:"lblSample:8", files:["4-A_01.jpg","4-A_01_s.jpg","4-A_02.jpg","4-A_02_s.jpg"] },
+    { label:"lblSample:9", files:["3-A1.jpg","3-A1_e.jpg","3-A1_s.jpg","3-A2_e.jpg","3-A2_s.jpg","3-A3_e.jpg","3-A3_s.jpg","3-A4_e.jpg","3-A4_s.jpg","3-B1.jpg","3-B1_e.jpg","3-B1_s.jpg","3-B2.jpg","3-B2_e.jpg","3-B2_s.jpg","3-B3.jpg"] },
+    { label:"lblSample:10", files:["2-A1as.jpg","2-A1s.jpg","2-A2as.jpg","2-A2s.jpg","2-A3as.jpg","2-A4as.jpg","2-A4s.jpg","2-A5as.jpg","2-B1s.jpg","2-B2s.jpg","2-B3s.jpg","2-B4s.jpg","2-B5s.jpg"] }
+  ],
+  character: [
+    { label:"lbl2DSample", files:["2D_Character_001.jpg","2D_Character_003.jpg","2D_Character_004.jpg","2D_Character_007.jpg","2D_Character_006.jpg","2D_Character_005.jpg","C_001.jpg","C_002.jpg"] },
+    { label:"lbl3DSample", files:["Char001.jpg","Char002.jpg","Char003.jpg","Char004.jpg","Char005.jpg","Char006.jpg","Char007.jpg","Char008.jpg","Char009.jpg","Char0010.jpg","Char0011.jpg","3D_Character_001.jpg","3D_Character_002.jpg","3D_Character_003.jpg","3D_Character_004.jpg","3D_Character_005.jpg","3D_Character_006.jpg","3D_Character_007.jpg","3D_Character_008.jpg","3D_Character_009.jpg"] }
+  ],
+  animation: [
+    { label:"lblCompiled", files:["clip.mp4","retas-paint.mp4"] },
+    { label:"lblIndividual", files:["1wen-001.mp4","1wen_002.mp4","1wen_003.mp4","1wen_004.mp4","1wen_005.mp4","1wen_006.mp4","1wen_007.mp4","1wen_008.mp4","DongKonTi-001.mp4","DongKonTi_002.mp4","DongKonTi_003.mp4","leyout-002.mp4","leyout-003.mp4","sample-fight.mp4","3dMovie_003.mp4","3dMovie_004.mp4","3dMovie_005.mp4"] }
+  ],
+  rendering: [
+    { label:"lblCompiled", files:["2d_AllView.mp4"] },
+    { label:"lblIndividual", files:["mita.mp4","gui.mp4","EU-001.mp4","China-001.mp4","3dMovie_001.mp4","3dMovie_002.mp4"] }
+  ],
+  vfx: [
+    { label:"lblSample:1", files:["Nuke-roto-paint.mp4"] },
+    { label:"lblSample:2", files:["Cleanupback_001.mp4","Cleanupback_002.mp4"] },
+    { label:"lblSample:3", files:["CleanupBack-001.mp4","CleanupBack-002.mp4"] },
+    { label:"lblSample:4", files:["Cleanupback1_001.mp4","Cleanupback1_002.mp4"] },
+    { label:"lblSample:5", files:["CleanupBaj_001.mp4","CleanupBaj_002.mp4"] },
+    { label:"lblSample:6", files:["CleanupBajul-001.mp4","CleanupBajul-002.mp4"] },
+    { label:"lblSample:7", files:["CleanupBar-001.mp4","CleanupBar-002.mp4"] },
+    { label:"lblSample:8", files:["Rotocol_001.mp4","Rotocol_002.mp4"] }
+  ],
+  pixelart: [
+    { label:"lblClientProvidedMonster", files:["D-001.gif"] },
+    { label:"lblCompletedMonster", files:["D-002.gif"] },
+    { label:"lblClientProvidedSet", files:["M-dotold.gif","M-dot_all.bmp"] },
+    { label:"lblCompletedSet", files:["M-001.gif","M-002.gif","M-003.gif","M-004.gif","M-005.gif","M-006.gif","M-007.gif","M-008.gif","M-009.gif"] },
+  ]
+};
+
+const A = {
+  manager: BASE + "manaser.jpg",
+  lipsync: ["lip-001.jpg","lip-002.jpg","lipsync-001.mp4","lipsync-002.mp4","lipsync-003.mp4"],
+  storyboard: ["stor001.jpg","stor002.jpg","stor003.jpg","stor004.jpg","stor005.jpg","stor006.jpg","stor007.jpg","stor008.jpg","stor009.jpg","stor0010.jpg","stor0011.jpg","stor0012.jpg","stor0013.jpg","stor0014.jpg","stor0015.jpg","stor0016.jpg","stor0017.jpg","stor0018.jpg","stor0019.jpg","stor0020.jpg","stor0021.jpg","stor0022.jpg","stor0023.jpg","stor0024.jpg","stor0025.jpg","stor0026.jpg","stor0027.jpg","stor0028.jpg"],
+  layout: ["leyout.mp4","layout-001.mp4"],
+  compositing: [
+    "Coloring_001.mp4","Coloring_002.mp4","Coloring_004.mp4",
+    "Moho_003.mp4","Moho_004.mp4"
+  ],
+  coloring: ["color001.JPG","color002.JPG","color003.JPG","color004.JPG","color005.JPG","color006.JPG","color007.JPG","color008.JPG","color009.JPG","color0010.JPG","color0011.JPG","color0012.JPG","color0013.JPG","color0014.JPG","color0015.JPG","color0016.JPG","color0017.JPG","color0018.JPG","color0019.JPG","color0020.JPG","Coloring_003.mp4","Moho_001.mp4","Moho_002.mp4"],
+  effects: ["effect_001.mp4","effect_002.mp4","effect_003.mp4","effect_001.JPG"],
+  background: BLOCK_GROUPS.background.flatMap(g=>g.files),
+  sensation: BLOCK_GROUPS.sensation.flatMap(g=>g.files),
+  character: BLOCK_GROUPS.character.flatMap(g=>g.files),
+  animation: BLOCK_GROUPS.animation.flatMap(g=>g.files),
+  rendering: BLOCK_GROUPS.rendering.flatMap(g=>g.files),
+  vfx: BLOCK_GROUPS.vfx.flatMap(g=>g.files),
+  pixelart: BLOCK_GROUPS.pixelart.flatMap(g=>g.files)
+};
+
+/* i18n */
+const I18N = {
+  en: {
+    heroTitle:"Fantasy Frame Studio",
+    heroSub:"With human hands, we breathe soul into every frame.",
+    heroQuote:"“Fantasy fades if it stays only in the mind. It only comes alive when captured in frames.”",
+    labelCompany:"01 · Company", companyTitle:"Company Introduction",
+    companyP1:"A workshop that captures a world of fantasy, frame by frame.",
+    companyP2:"Fantasy — Not mere imagination. The ability to create a world that doesn't exist but could plausibly exist.",
+    companyP3:"Frame — 24 drawings per second. That 1/24th of a second; each one gathered breathes life into a character.",
+    companyP4:"Studio — A space where dozens of professionals each at their station craft a single film together.",
+    labelFounder:"02 · Founder", founderTitle:"The Founder's Story",
+    founderP1:"In 2017, with one digital tablet, two boxes of storyboards, and six like-minded people, Hwan Frame was founded in an old workspace.",
+    founderP2:"Years later, that small space — where we even conserved air conditioning — has grown into a team of nearly dozens of accomplished animation professionals.",
+    founderP3:"I still maintain one habit: I personally draw the first concept sketch for every project.",
+    labelComm:"03 · Commissions", commTitle:"Domestic & International Commissions",
+    commP1:"Hwan Frame undertakes various animation production commissions both domestically and internationally. The majority of orders are for 2D animation, and we also actively operate part-by-part ordering. In addition, we are also accepting orders for special effects (VFX) for film production and 2D pixel art and dot art.",
+    cardParts:"Animation Part Order Categories", cardPartsDesc:"11 specialized categories — click to explore",
+    cardVfx:"Film VFX Commissions", cardVfxDesc:"Nuke · Silhouette · Houdini based VFX",
+    cardPixel:"2D Pixel Art / Dot Commissions", cardPixelDesc:"Monster dots · Set dots · GIF gallery",
+    labelCore:"04 · Core", coreTitle:"Our Core: “The Power of Drawing by Hand”",
+    coreP1:"Hwan Frame's greatest asset is its nearly dozens of animation professionals. Key animators, in-between animators, animation directors, background artists, and compositing specialists each handle their own fields.",
+    coreP2:"Our most distinct strength is our capability in traditional hand-drawn concept art. Hand-drawn concept art does not simply mean “drawing by hand.” It is a creative act of directly controlling a character’s breath, center, and the subtle tremors of their emotions frame by frame.",
+    labelAi:"05 · Trend", aiTitle:"AI Is Powerful, but Two Hands Cannot Be Replaced",
+    aiP1:"In 2025, the AI penetration rate among surveyed animation companies in China reached 90.3%, and more than half officially adopted AI tools in production.",
+    aiP2:"However, generative AI has made remarkable progress in visual realism but is difficult to replace human animators in the field of 'acting' — the core of character animation.",
+    aiP3:"AI is a capable assistant at our workbench, but what ultimately determines whether a character is 'alive' is still the animator's hands, eyes, and judgment.",
+    labelTools:"06 · Tools", toolsTitle:"The Tools in Our Hands",
+    toolsP1:"----- ",
+    toolsP2:"These are 2D and 3D animation production tools, movie VFX production tools, and 2D pixel art and dot production tools.You can directly download and install the necessary tools.",
+    toolsP3:"Clip StudioPaint and RETAS Studio are our team's primary production tools. While CSP excels in hand-drawn original artwork, intermediate drawings, and storyboarding, RETAS demonstrates strength in mass production and the division of labor that extends from line art and coloring to photography. We strategically combine and utilize these two core tools depending on the nature of the project.",
+    toolsP4:"Moho (also known as Anime Studio) is 2D animation software that we use as an auxiliary tool in specific projects.",
+    labelEdu:"07 · Education", eduTitle:"Independent Education System: Keeping Skills Unbroken",
+    eduP1:"In-house training program — step-by-step curricula from new animators to veterans, based on a mentor-apprentice system across key animation, in-between, background, and compositing.",
+    eduP2:"Hand-drawn key animation succession project — veteran key animators personally teach young people in a permanently operated program.",
+    eduP3:"External workshops, online learning content, and internship acceptance promote skill improvement across the entire team.",
+    eduP4:"This educational system is not merely about teaching technology. It is also a venue for conveying to the next generation the philosophy of work of *Circular Frame*: 'Breathing a soul into every frame with human hands.' No matter how advanced AI becomes, education by humans is indispensable to cultivate its judgment and sensibility.",
+    labelWorks:"08 · Works", worksTitle:"Some of the works provided by Hwan Frame",
+    workAnim:"Animation Production", workAnimDesc:"11-category gallery — click to explore",
+    workVfx:"Film VFX Commissions", workVfxDesc:"Nuke roto · paint work",
+    workPixel:"2D Pixel Art / Dot Commissions", workPixelDesc:"Monster · Set dot GIFs",
+    worksQuote:"The founder says: “We are not just making works — we are cultivating the talent who will continue this work. That is our responsibility.”",
+    modalCatTitle:"Animation Part Order Categories",
+    modalCatSub:"Select one of the 11 categories to open its media gallery.",
+    catBackground:"Background", catCharacter:"Character", catAnimation:"Animation",
+    catLipsync:"Lip-Sync", catRendering:"Rendering", catStoryboard:"Storyboard",
+    catLayout:"Layout", catCompositing:"Compositing", catColoring:"Coloring", catEffects:"Effects",
+    catSens:"Animation Director",
+    lblSample:"Sample",
+    lbl2DSample:"2D Sample",
+    lbl3DSample:"3D Sample",
+    lblCompiled:"Compiled Materials",
+    lblIndividual:"Individual Materials",
+    lblClientProvidedMonster:"Client Provided (MonsterDot)",
+    lblCompletedMonster:"Completed (MonsterDot)",
+    lblClientProvidedSet:"Client Provided (SetDot)",
+    lblCompletedSet:"Completed (SetDot)",
+    back:"← Back", empty:"No media to display.",
+    zoomHint:"Double-click to zoom", fsCounter:" / "
+  },
+  ko: {
+    heroTitle:"Fantasy Frame Studio",
+    heroSub:"인간의 손으로, 모든 프레임에 령혼을 불어넣는다.",
+    heroQuote:"“환상은 머리속에만 있으면 사라진다. 프레임으로 붙잡아야 비로소 살아난다.”",
+    labelCompany:"01 · 회사소개", companyTitle:"회사소개",
+    companyP1:"《환상의 세계를, 한 프레임 한 프레임에 담아내는 작업실》",
+    companyP2:"Fantasy — 단순한 공상이 아니라, 현실에는 없지만 있을 법한 세계를 창조하는 능력.",
+    companyP3:"Frame — 1초에 24장의 그림. 그 24분의 1초, 한 장 한 장이 모여 캐릭터에 숨을 불어넣는다.",
+    companyP4:"Studio — 수십 명의 전문가가 각자의 자리에서 한 편의 영상을 함께 빚어내는 공간.",
+    labelFounder:"02 · 창립자", founderTitle:"창립자의 이야기",
+    founderP1:"2017년, 디지털 태블릿 한 대와 두 상자의 콘티, 그리고 뜻이 맞는 6명과 함께 어느 낡은 작업실에서 《환프레임》이 창립되었다.",
+    founderP2:"수년이 지난 지금, 그때 에어컨도 아끼던 작은 공간은 약 수십 명의 애니메이션 전문가를 보유한 팀으로 성장했다.",
+    founderP3:"나는 여전히 한 가지 습관을 유지한다: 모든 프로젝트의 첫 번째 컨셉 스케치는 반드시 내가 직접 그린다.",
+    labelComm:"03 · 주문제작", commTitle:"국내외주문제작현황",
+    commP1:"《환프레임》은 국내는 물론 해외에서도 각종 애니메이션 제작 주문을 받아 진행하고 있다. 주문의 주류는 2D 애니메이션이며, 부분별로 나누어 주문받는 방식도 활발히 운영 중이다. 이밖에 영화제작 특수효과(VFX)와 2D 픽셀아트·도트주문도 받고 있다.",
+    cardParts:"애니메이션 부분별 주문항목구분", cardPartsDesc:"11개 분야별 세분화 주문 — 클릭하여 확인",
+    cardVfx:"영화제작 특수효과(VFX)주문", cardVfxDesc:"Nuke · Silhouette · Houdini 기반 VFX",
+    cardPixel:"2D 픽셀아트·도트주문", cardPixelDesc:"몬스터 도트 · 세트 도트 · GIF 갤러리",
+    labelCore:"04 · 핵심", coreTitle:"우리의 핵심: “손으로 그리는 힘”",
+    coreP1:"《환프레임》의 최대 자산은 약 수십 명의 애니메이션 전문가이다. 원화가, 동화가, 작화감독, 배경미술가, 합성 전문가가 각자 고유의 분야를 담당한다.",
+    coreP2:"우리의 가장 뚜렷한 강점은 전통적인 수작업원화제작능력이다. 수작업 원화는 단순히 “손으로 그리는 것”을 의미하지 않는다. 캐릭터의 호흡, 중심, 감정의 미세한 떨림을 프레임 단위로 직접 제어하는 창작 행위이다.",
+    labelAi:"05 · 트렌드", aiTitle:"AI는 강력하지만, 두 손은 대체 불가능하다",
+    aiP1:"2025년 중국 조사대상 애니메이션 기업의 AI 침투율은 90.3%에 달했고, 절반 이상의 기업이 제작 공정에 AI 도구를 공식 도입했다.",
+    aiP2:"그러나 생성 AI는 시각적 리얼리즘에서는 놀라운 발전을 이루었지만, 캐릭터 애니메이션의 핵심인 “연기” 영역에서는 인간 애니메이터를 대체하기 어렵다.",
+    aiP3:"AI는 우리 작업대의 유능한 조수이지만, 한 캐릭터가 “살아있는가”를 최종적으로 결정하는 것은 여전히 애니메이터의 손, 눈, 판단력이다.",
+    labelTools:"06 · 도구", toolsTitle:"우리 손에 있는 도구들",
+    toolsP1:"----- ",
+    toolsP2:"이것은  2D 및 3D애니메이션제작도구와 영화 VFX 제작도구, 2D 픽셀아트·도트제작도구들이다. 필요한 도구를 직접 다운하여 설치가능하다.",
+    toolsP3:"Clip StudioPaint와 RETAS Studio는 우리 팀의 주력 제작 도구다. CSP가 손맛중심의 원화·중간화·콘티작업에 강점을 보인다면, RETAS는 선화·채색·촬영으로 이어지는 공정분업과 대량생산에 강점을 보인다. 우리는 프로젝트의 성격에 따라 두 주력도구를 전략적으로 조합하여 운용한다.",
+    toolsP4:"Moho(일명 Anime Studio)는 우리가 특정프로젝트에서 보조적으로 활용하는 2D 애니메이션 소프트웨어이다.",
+    labelEdu:"07 · 교육", eduTitle:"독자적 교육체계: 기술을 끊기지 않게, 전문가를 키운다",
+    eduP1:"회사내 연수 프로그램 — 신인부터 중견, 베테랑까지 단계별 커리큘럼. 원화, 동화, 배경, 합성 각 분야에서 선배가 후배를 지도하는 사제 제도가 기본이다.",
+    eduP2:"손원도 계승 프로젝트 — 베테랑 원화가가 젊은이를 직접 손을 잡고 가르치는 계승 프로그램을 상시 운영한다.",
+    eduP3:"외부 대상 워크숍 · 온라인 학습 콘텐츠 · 인턴십 수용을 통해 팀 전체의 스킬 향상과 신인 발굴을 도모한다.",
+    eduP4:"이 교육체계는 단순히 기술을 가르치는것만이 아니다. 《환프레임》의 일의 철학인 《인간의 손으로, 모든 프레임에 영혼을 불어넣는다》는 신념을 다음 세대에 전하는 장이기도 하다. AI가 아무리 발전해도 그 판단력과 감성을 키우려면 인간에 의한 인간의 교육이 불가결하다.",
+    labelWorks:"08 · 작품", worksTitle:"《환프레임》이 내놓은 “일부 작품들”",
+    workAnim:"애니메이션제작", workAnimDesc:"11개 분야별 갤러리 — 클릭하여 확인",
+    workVfx:"영화제작 특수효과(VFX)주문", workVfxDesc:"Nuke 로토 · 페인트 작업",
+    workPixel:"2D 픽셀아트·도트주문", workPixelDesc:"몬스터 · 세트 도트 GIF",
+    worksQuote:"창립자는 이렇게 말한다. “우리는 작품을 만드는 것뿐만 아니라, 이 일을 계속할 인재를 키우고 있다. 그것이 우리의 책임이다.”",
+    modalCatTitle:"애니메이션 부분별 주문항목구분",
+    modalCatSub:"11개 분야 중 하나를 선택하면 해당 미디어 갤러리가 열립니다.",
+    catBackground:"배경", catCharacter:"캐릭터", catAnimation:"애니메이션",
+    catLipsync:"립싱크", catRendering:"렌더링", catStoryboard:"스토리보드",
+    catLayout:"레이아웃", catCompositing:"합성", catColoring:"채색", catEffects:"특수효과",
+    catSens:"작감(작화감독)",
+    lblSample:"샘플",
+    lbl2DSample:"2D샘플",
+    lbl3DSample:"3D샘플",
+    lblCompiled:"묶어서 편집한 자료",
+    lblIndividual:"개별적인 자료",
+    lblClientProvidedMonster:"주문자 제공(MonsterDot)",
+    lblCompletedMonster:"완성 후(MonsterDot)",
+    lblClientProvidedSet:"주문자 제공(SetDot)",
+    lblCompletedSet:"완성 후(SetDot)",
+    back:"← 뒤로", empty:"표시할 자료가 없습니다.",
+    zoomHint:"더블클릭 확대", fsCounter:" / "
+  },
+  jp: {
+    heroTitle:"Fantasy Frame Studio",
+    heroSub:"人間の手で、すべてのフレームに魂を吹き込む。",
+    heroQuote:"「幻想は頭の中だけにあれば消えてしまう。フレームで捉えてこそ、初めて生きる。」",
+    labelCompany:"01 · 会社紹介", companyTitle:"会社紹介",
+    companyP1:"幻想の世界を、一フレーム一フレームに収め込む作業室。",
+    companyP2:"Fantasy — 単なる空想ではない。現実には存在しないがあり得る世界を創造する能力。",
+    companyP3:"Frame — 1秒に24枚の絵。その24分の1秒、一枚一枚が集まってキャラクターに命を吹き込む。",
+    companyP4:"Studio — 数十人の専門家がそれぞれの持ち場で一編の映像を共に紡ぎ出す空間。",
+    labelFounder:"02 · 創立者", founderTitle:"創立者の物語",
+    founderP1:"2017年、デジタルタブレット一台と二箱のコンティ、そして志を同じくする6人とともに、ある古い作業室で「幻フレーム」は創立された。",
+    founderP2:"数年が経った今、その当時エアコンさえ惜しんだ小さな空間は、約数十名のアニメーション専門家を擁するチームへと成長した。",
+    founderP3:"私は今でも一つの習慣を保っている。すべてのプロジェクトの最初のコンセプトスケッチは、必ず私自身が直接描く。",
+    labelComm:"03 · 受注制作", commTitle:"国内外受注制作状況",
+    commP1:"「幻フレーム」は国内はもちろん海外からも各種アニメーション制作の受注を受け、進行している。受注の主流は2Dアニメーションであり、部分ごとに分けて受注・進行する方式も活発に運用している。この他に映画製作特殊効果（VFX）と2Dピクセルアート・ドット注文も受けている。",
+    cardParts:"アニメーション部分別受注項目区分", cardPartsDesc:"11分野別の細分化受注 — クリックして確認",
+    cardVfx:"映画制作特殊効果(VFX)受注", cardVfxDesc:"Nuke · Silhouette · Houdini ベース VFX",
+    cardPixel:"2D ピクセルアート・ドット受注", cardPixelDesc:"モンスタードット · セットドット · GIFギャラリー",
+    labelCore:"04 · 核心", coreTitle:"私たちの核心：「手で描く力」",
+    coreP1:"「幻フレーム」の最大の資産は約数十名のアニメーション専門家である。原画家、動画家、作画監督、背景美術家、合成専門家がそれぞれ固有の分野を担っている。",
+    coreP2:"私たちの最も明確な強みは伝統的な手原画製作能力です。手原画は単に「手描き」を意味しません。キャラクターの呼吸、中心、感情の細かい震えをフレーム単位で直接制御する創作行為だ。",
+    labelAi:"05 · トレンド", aiTitle:"AIは強力だが、両手は代替不可能である",
+    aiP1:"2025年、中国の調査対象アニメーション企業のAI浸透率は90.3%に達し、半数以上の企業が制作工程にAIツールを公式導入した。",
+    aiP2:"しかし、生成AIは視覚的リアリズムにおいて驚くべき発展を遂げたが、キャラクターアニメーションの核心である「演技」の領域では人間のアニメーターを代替することは難しい。",
+    aiP3:"AIは私たちの作業台の有能な助手だが、一人のキャラクターが「生きているか」を最終的に決定するのは、依然としてアニメーターの手、目、そして判断力である。",
+    labelTools:"06 · ツール", toolsTitle:"私たちの手にあるツール",
+    toolsP1:"----- ",
+    toolsP2:"これは2Dおよび3Dアニメーション制作ツールと映画VFX制作ツール、2Dピクセルアート・ドット制作ツールだ。必要なツールを直接ダウンしてインストール可能です。",
+    toolsP3:"Clip StudioPaintとRETAS Studioは私たちのチームの主力制作ツールです。 CSPが手味中心の原画・中間化・コンティ作業に強みを見せると、RETASは線画・彩色・撮影につながる工程分業と大量生産に強みを見せる。私たちは、プロジェクトの性格に応じて2つの主力ツールを戦略的に組み合わせて運用します。",
+    toolsP4:"Moho（別名Anime Studio）は、私たちが特定のプロジェクトで補助的に活用する2Dアニメーションソフトウェアです。",
+    labelEdu:"07 · 教育", eduTitle:"独自の教育体系：技術を途切れさせず、専門家を育てる",
+    eduP1:"社内研修プログラム — 新人から中堅、ベテランまで段階別の研修カリキュラム。原画、動画、背景、合成の各分野で先輩が後輩を指導する師弟制度を基本とする。",
+    eduP2:"手原画継承プロジェクト — ベテラン原画家が若者に直接手を取って教える継承プログラムを常時運営している。",
+    eduP3:"外部対象ワークショップ、オンライン学習コンテンツ、インターンシップ受け入れを通じて、チーム全体のスキル向上と新人発掘を図る。",
+    eduP4:"この教育システムは単に技術を教えるだけではありません。 「ファンフレーム」の仕事の哲学である「人間の手で、すべてのフレームに魂を吹き込む」という信念を次世代に伝える場でもある。 AIがいくら発展してもその判断力と感性を育てるには、人間による人間の教育が不可欠だ。",
+    labelWorks:"08 · 作品", worksTitle:"「幻フレーム」が世に送り出す「作品の一部」",
+    workAnim:"アニメーション制作", workAnimDesc:"11分野別ギャラリー — クリックして確認",
+    workVfx:"映画制作特殊効果(VFX)受注", workVfxDesc:"Nuke ロト · ペイント作業",
+    workPixel:"2D ピクセルアート・ドット受注", workPixelDesc:"モンスター · セットドット GIF",
+    worksQuote:"創立者はこう語る。「私たちは作品を作っているだけでなく、この仕事を続ける人材を育てている。それが私たちの責任である。」",
+    modalCatTitle:"アニメーション部分別受注項目区分",
+    modalCatSub:"11分野のいずれかを選択すると、そのメディアギャラリーが開きます。",
+    catBackground:"背景", catCharacter:"キャラクター", catAnimation:"アニメーション",
+    catLipsync:"リップシンク", catRendering:"レンダリング", catStoryboard:"ストーリーボード",
+    catLayout:"レイアウト", catCompositing:"合成", catColoring:"彩色", catEffects:"特殊効果",
+    catSens:"作画監督(作監)",
+    lblSample:"サンプル",
+    lbl2DSample:"2Dサンプル",
+    lbl3DSample:"3Dサンプル",
+    lblCompiled:"編集済み資料",
+    lblIndividual:"個別資料",
+    lblClientProvidedMonster:"依頼者提供(MonsterDot)",
+    lblCompletedMonster:"完成後(MonsterDot)",
+    lblClientProvidedSet:"依頼者提供(SetDot)",
+    lblCompletedSet:"完成後(SetDot)",
+    back:"← 戻る", empty:"表示する資料がありません。",
+    zoomHint:"ダブルクリックで拡大", fsCounter:" / "
+  },
+  ru: {
+    heroTitle:"Fantasy Frame Studio",
+    heroSub:"Человеческими руками мы вдыхаем душу в каждый кадр.",
+    heroQuote:"«Фантазия исчезает, если остаётся только в уме. Она оживает, лишь когда её запечатлевают в кадре».",
+    labelCompany:"01 · О компании", companyTitle:"О компании",
+    companyP1:"Мастерская, которая запечатлевает мир фантазии кадр за кадром.",
+    companyP2:"Fantasy — Не просто воображение. Способность создавать мир, которого не существует, но который мог бы существовать.",
+    companyP3:"Frame — 24 рисунка в секунду. Эта 1/24 секунды; каждый из них, собранные вместе, вдыхают жизнь в персонажа.",
+    companyP4:"Studio — Пространство, где десятки профессионалов на своих местах вместе создают один фильм.",
+    labelFounder:"02 · Основатель", founderTitle:"История основателя",
+    founderP1:"В 2017 году с одним цифровым планшетом, двумя коробками раскадровок и шестью единомышленниками в старой мастерской была основана студия Hwan Frame.",
+    founderP2:"Спустя годы то маленькое пространство — где мы даже экономили на кондиционере — выросло в команду из почти десятков опытных профессионалов анимации.",
+    founderP3:"Я до сих пор сохраняю одну привычку: я лично рисую первый концепт-скетч для каждого проекта.",
+    labelComm:"03 · Заказы", commTitle:"Внутренние и международные заказы",
+    commP1:"Hwan Frame принимает различные заказы на производство анимации как внутри страны, так и за рубежом. Большинство заказов приходится на 2D-анимацию, мы также активно практикуем поэтапный заказ по частям. Кроме того, мы принимаем заказы на спецэффекты (VFX) для кино и 2D-пиксель-арт и дот-арт.",
+    cardParts:"Категории заказов по частям анимации", cardPartsDesc:"11 специализированных категорий — нажмите, чтобы изучить",
+    cardVfx:"Заказы на VFX для кино", cardVfxDesc:"VFX на основе Nuke · Silhouette · Houdini",
+    cardPixel:"Заказы на 2D пиксель-арт / дот", cardPixelDesc:"Дот-монстры · Дот-сеты · GIF-галерея",
+    labelCore:"04 · Ядро", coreTitle:"Наше ядро: «Сила рисования вручную»",
+    coreP1:"Главное достояние Hwan Frame — почти десятки профессионалов анимации. Ведущие аниматоры, промежуточные аниматоры, режиссёры анимации, художники фонов и специалисты по композитингу — каждый отвечает за свою область.",
+    coreP2:"Наша самая отличительная черта — способность создавать традиционные концепт-арты вручную. Рисование вручную — это не просто «рисование руками». Это творческий акт прямого управления дыханием персонажа, его центром и тонкими треморами эмоций кадр за кадром.",
+    labelAi:"05 · Тренды", aiTitle:"ИИ мощен, но две руки незаменимы",
+    aiP1:"В 2025 году уровень проникновения ИИ среди обследованных анимационных компаний Китая достиг 90,3%, и более половины официально внедрили инструменты ИИ в производство.",
+    aiP2:"Однако генеративный ИИ добился огромного прогресса в визуальном реализме, но ему трудно заменить аниматоров-людей в области «актёрской игры» — сердце анимации персонажей.",
+    aiP3:"ИИ — способный помощник на нашем рабочем столе, но в конечном счёте определяют, «жив» ли персонаж, по-прежнему руки, глаза и суждение аниматора.",
+    labelTools:"06 · Инструменты", toolsTitle:"Инструменты в наших руках",
+    toolsP1:"----- ",
+    toolsP2:"Это инструменты для производства 2D- и 3D-анимации, инструменты для создания кино-VFX и инструменты для 2D-пиксель-арта и дот-арта. Вы можете напрямую скачать и установить необходимые инструменты.",
+    toolsP3:"Clip StudioPaint и RETAS Studio — основные производственные инструменты нашей команды. Если CSP отлично подходит для ручной работы над оригинальными рисунками, промежуточными кадрами и раскадровками, то RETAS демонстрирует силу в массовом производстве и разделении труда от контуринга и раскраски до съёмки. Мы стратегически комбинируем и используем эти два основных инструмента в зависимости от характера проекта.",
+    toolsP4:"Moho (также известный как Anime Studio) — это программное обеспечение для 2D-анимации, которое мы используем как вспомогательный инструмент в определённых проектах.",
+    labelEdu:"07 · Образование", eduTitle:"Независимая система обучения: сохраняем навыки непрерывными",
+    eduP1:"Внутренняя программа обучения — пошаговые учебные планы от новичков до ветеранов, основанные на системе наставничества в ключевой анимации, промежуточной анимации, фонах и композитинге.",
+    eduP2:"Проект преемственности ручной ключевой анимации — опытные ведущие аниматоры лично обучают молодёжь в постоянно действующей программе.",
+    eduP3:"Внешние мастер-классы, онлайн-обучающий контент и приём стажёров способствуют повышению квалификации всей команды.",
+    eduP4:"Эта образовательная система не просто обучает технологиям. Это также площадка для передачи следующему поколению философии работы *Circular Frame*: «Вдыхать душу в каждый кадр человеческими руками». Как бы ни развивался ИИ, человеческое образование необходимо для развития его суждений и чувствительности.",
+    labelWorks:"08 · Работы", worksTitle:"Некоторые работы, предоставленные Hwan Frame",
+    workAnim:"Производство анимации", workAnimDesc:"Галерея по 11 категориям — нажмите, чтобы изучить",
+    workVfx:"Заказы на VFX для кино", workVfxDesc:"Рото · пейнт в Nuke",
+    workPixel:"Заказы на 2D пиксель-арт / дот", workPixelDesc:"GIF-анимации монстров и сетов",
+    worksQuote:"Основатель говорит: «Мы не просто создаём работы — мы растим таланты, которые продолжат это дело. Это наша ответственность».",
+    modalCatTitle:"Категории заказов по частям анимации",
+    modalCatSub:"Выберите одну из 11 категорий, чтобы открыть галерею медиа.",
+    catBackground:"Фон", catCharacter:"Персонаж", catAnimation:"Анимация",
+    catLipsync:"Липсинк", catRendering:"Рендеринг", catStoryboard:"Раскадровка",
+    catLayout:"Лейаут", catCompositing:"Композитинг", catColoring:"Раскраска", catEffects:"Эффекты",
+    catSens:"Режиссёр анимации",
+    lblSample:"Образец",
+    lbl2DSample:"2D образец",
+    lbl3DSample:"3D образец",
+    lblCompiled:"Скомпилированные материалы",
+    lblIndividual:"Отдельные материалы",
+    lblClientProvidedMonster:"Предоставлено заказчиком (MonsterDot)",
+    lblCompletedMonster:"Готово (MonsterDot)",
+    lblClientProvidedSet:"Предоставлено заказчиком (SetDot)",
+    lblCompletedSet:"Готово (SetDot)",
+    back:"← Назад", empty:"Нет медиа для отображения.",
+    zoomHint:"Двойной клик для увеличения", fsCounter:" / "
+  },
+  zh: {
+    heroTitle:"Fantasy Frame Studio",
+    heroSub:"以人类之手，为每一帧注入灵魂。",
+    heroQuote:"「幻想若只存在于脑海中，便会消逝。唯有将其捕捉于帧中，方能真正获得生命。」",
+    labelCompany:"01 · 公司介绍", companyTitle:"公司介绍",
+    companyP1:"《将幻想世界，一帧一帧地收录其中的工作室》",
+    companyP2:"Fantasy — 并非单纯的空想。而是创造现实中不存在、却仿佛理应存在的世界的能力。",
+    companyP3:"Frame — 每秒24张画。那二十四分之一秒，一张一张汇聚起来，为角色注入呼吸。",
+    companyP4:"Studio — 数十位专家在各自的岗位上，共同雕琢一部影像的空间。",
+    labelFounder:"02 · 创始人", founderTitle:"创始人的故事",
+    founderP1:"2017年，一台数字平板、两箱分镜稿，以及六位志同道合的伙伴，在一间破旧的工作室里创立了《幻帧》。",
+    founderP2:"数年后的今天，那个当年连空调都舍不得开的小空间，已成长为拥有约数十名动画专家的团队。",
+    founderP3:"我至今仍保持一个习惯：每个项目的第一个概念草图，必定由我亲手绘制。",
+    labelComm:"03 · 委托制作", commTitle:"国内外委托制作现状",
+    commP1:"《幻帧》不仅在国内，在海外也承接各类动画制作委托。委托的主流是2D动画，按部分分拆委托的方式也在积极运营中。此外，还承接电影制作特殊效果（VFX）以及2D像素艺术·点阵委托。",
+    cardParts:"动画分部分委托项目分类", cardPartsDesc:"11个领域的细分委托 — 点击查看",
+    cardVfx:"电影制作特殊效果(VFX)委托", cardVfxDesc:"基于 Nuke · Silhouette · Houdini 的 VFX",
+    cardPixel:"2D 像素艺术·点阵委托", cardPixelDesc:"怪物点阵 · 场景点阵 · GIF 画廊",
+    labelCore:"04 · 核心", coreTitle:"我们的核心：「手绘的力量」",
+    coreP1:"《幻帧》最大的资产是约数十名动画专家。原画师、动画师、作画监督、背景美术师、合成专家各自负责其独特的领域。",
+    coreP2:"我们最鲜明的优势是传统的手工原画制作能力。手工原画并非单纯的「用手画」。而是以帧为单位，直接控制角色的呼吸、重心、情感的细微颤动，是一种创作行为。",
+    labelAi:"05 · 趋势", aiTitle:"AI 强大，但双手不可替代",
+    aiP1:"2025年，中国调查对象动画企业的 AI 渗透率达到 90.3%，超过半数的企业已在制作流程中正式引入 AI 工具。",
+    aiP2:"然而，生成式 AI 在视觉写实方面取得了惊人的进展，但在角色动画的核心「表演」领域，仍难以取代人类动画师。",
+    aiP3:"AI 是我们工作台上的得力助手，但最终决定一个角色是否「活着」的，依然是动画师的手、眼与判断力。",
+    labelTools:"06 · 工具", toolsTitle:"我们手中的工具",
+    toolsP1:"----- ",
+    toolsP2:"这些是 2D 及 3D 动画制作工具、电影 VFX 制作工具、2D 像素艺术·点阵制作工具。您可以直接下載並安裝所需的工具。",
+    toolsP3:"Clip StudioPaint 与 RETAS Studio 是我们团队的主力制作工具。CSP 在注重手感的手绘原画、中间画、分镜作业上表现出色，而 RETAS 在线稿、上色、摄影这一流程分工与量产方面表现突出。我们会根据项目的性质，战略性地组合运用这两大主力工具。",
+    toolsP4:"Moho（又名 Anime Studio）是我们在特定项目中辅助使用的 2D 动画软件。",
+    labelEdu:"07 · 教育", eduTitle:"独特的教育体系：让技术不断层，培养专家",
+    eduP1:"公司内部研修计划 — 从新人到中坚、资深，分阶段课程。在原画、动画、背景、合成各领域，以老带新的师徒制为基础。",
+    eduP2:"手绘原画传承项目 — 资深原画师手把手教导年轻人的传承计划，常年运营。",
+    eduP3:"通过对外工作坊、在线学习内容、接收实习生，促进团队整体技能的提升与新人的发掘。",
+    eduP4:"这一教育体系不仅仅是传授技术。它也是将《幻帧》的工作哲学——「以人类之手，为每一帧注入灵魂」这一信念传递给下一代的场所。无论 AI 如何发展，要培养其判断力与感性，由人进行人的教育不可或缺。",
+    labelWorks:"08 · 作品", worksTitle:"《幻帧》推出的「作品的部分內容」",
+    workAnim:"动画制作", workAnimDesc:"11个领域画廊 — 点击查看",
+    workVfx:"电影制作特殊效果(VFX)委托", workVfxDesc:"Nuke 抠像 · 擦除作业",
+    workPixel:"2D 像素艺术·点阵委托", workPixelDesc:"怪物 · 场景点阵 GIF",
+    worksQuote:"创始人如是说：「我们不仅是在制作作品，更是在培养能够延续这份事业的人才。这是我们的责任。」",
+    modalCatTitle:"动画分部分委托项目分类",
+    modalCatSub:"选择11个领域之一，即可打开对应的媒体画廊。",
+    catBackground:"背景", catCharacter:"角色", catAnimation:"动画",
+    catLipsync:"对口型", catRendering:"渲染", catStoryboard:"分镜",
+    catLayout:"构图", catCompositing:"合成", catColoring:"上色", catEffects:"特效",
+    catSens:"作画监督",
+    lblSample:"样本",
+    lbl2DSample:"2D样本",
+    lbl3DSample:"3D样本",
+    lblCompiled:"汇编资料",
+    lblIndividual:"个别资料",
+    lblClientProvidedMonster:"委托方提供(MonsterDot)",
+    lblCompletedMonster:"完成后(MonsterDot)",
+    lblClientProvidedSet:"委托方提供(SetDot)",
+    lblCompletedSet:"完成后(SetDot)",
+    back:"← 返回", empty:"暂无可显示的资料。",
+    zoomHint:"双击放大", fsCounter:" / "
+  }
+};
+
+let currentLang = "en";
+
+function init(){
+  document.getElementById("heroBg").style.backgroundImage = `url('${A.manager}')`;
+  document.getElementById("companyBg").style.backgroundImage = `url('${A.manager}')`;
+  document.getElementById("founderBg").style.backgroundImage = `url('${A.manager}')`;
+  document.getElementById("managerImg").src = A.manager;
+  document.getElementById("commBg").style.backgroundImage = `url('${BASE + A.background[0]}')`;
+  document.getElementById("coreBg").style.backgroundImage = `url('${BASE + A.character[0]}')`;
+  document.getElementById("worksBg").style.backgroundImage = `url('${BASE + A.effects[3]}')`;
+
+  applyLang("en");
+  document.querySelectorAll("#langBar button").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll("#langBar button").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      applyLang(btn.dataset.lang);
+    });
+  });
+
+  document.addEventListener("play", handleVideoPlay, true);
+}
+
+function handleVideoPlay(e){
+  const playing = e.target;
+  if(playing.tagName !== "VIDEO") return;
+  document.querySelectorAll("video").forEach(v=>{
+    if(v !== playing && !v.paused) v.pause();
+  });
+}
+
+function applyLang(lang){
+  currentLang = lang;
+  const dict = I18N[lang];
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.dataset.i18n;
+    if(dict[key]) el.textContent = dict[key];
+  });
+  document.documentElement.lang = lang === "jp" ? "ja" : (lang === "zh" ? "zh-CN" : lang);
+}
+
+function openModal(html){
+  document.getElementById("modalBody").innerHTML = html;
+  document.getElementById("modalOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+  document.querySelectorAll("video").forEach(v=>v.pause());
+}
+function closeModal(){
+  document.getElementById("modalOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+  document.querySelectorAll("video").forEach(v=>v.pause());
+}
+
+function openCategoryModal(){
+  const d = I18N[currentLang];
+  /* ★ 순서 변경: 작감, 캐릭터, 애니메이션, 배경, 채색, 특수효과, 스토리보드, 레이아웃, 합성, 렌더링, 립싱크 */
+  const items = [
+    {key:"sensation",   label:d.catSens,        icon:"👤"},
+    {key:"character",   label:d.catCharacter,   icon:"👤"},
+    {key:"animation",   label:d.catAnimation,   icon:"🎞"},
+    {key:"background",  label:d.catBackground,  icon:"🖼"},
+    {key:"coloring",    label:d.catColoring,    icon:"🎨"},
+    {key:"effects",     label:d.catEffects,     icon:"✨"},
+    {key:"storyboard",  label:d.catStoryboard,  icon:"📝"},
+    {key:"layout",      label:d.catLayout,      icon:"📐"},
+    {key:"compositing", label:d.catCompositing, icon:"🧩"},
+    {key:"rendering",   label:d.catRendering,   icon:"🎬"},
+    {key:"lipsync",     label:d.catLipsync,     icon:"👄"}
+  ];
+  let html = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3>${d.modalCatTitle}</h3>
+    <p class="modal-sub">${d.modalCatSub}</p>
+    <div class="cat-grid">`;
+  items.forEach(it=>{
+    html += `<button class="cat-btn" onclick="openMediaModal('${it.key}')">
+      ${it.icon} ${it.label}<small>${A[it.key] ? A[it.key].length : 0} files</small>
+    </button>`;
+  });
+  html += `</div>`;
+  openModal(html);
+}
+
+function isBlockCategory(key){
+  return key === "background" || key === "sensation" || key === "character" || key === "animation" || key === "rendering" || key === "vfx" || key === "pixelart";
+}
+
+function resolveLabel(raw){
+  const d = I18N[currentLang];
+  if(raw.includes(":")){
+    const [key, num] = raw.split(":");
+    return (d[key] || key) + num;
+  }
+  return d[raw] || raw;
+}
+
+function openMediaModal(catKey){
+  const d = I18N[currentLang];
+  const files = A[catKey] || [];
+  const labelMap = {
+    background:d.catBackground, character:d.catCharacter, animation:d.catAnimation,
+    lipsync:d.catLipsync, rendering:d.catRendering, storyboard:d.catStoryboard,
+    layout:d.catLayout, compositing:d.catCompositing, coloring:d.catColoring,
+    effects:d.catEffects, sensation:d.catSens, vfx:d.cardVfx, pixelart:d.cardPixel
+  };
+  const title = labelMap[catKey] || catKey;
+
+  /* ★ 뒤로 버튼: VFX/픽셀아트는 닫기, 작감은 카테고리 목록으로 */
+  let backAction;
+  if(catKey === "vfx" || catKey === "pixelart"){
+    backAction = "closeModal()";
+  } else {
+    backAction = "openCategoryModal()";
+  }
+
+  let html = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="back-btn-wrap">
+      <button class="back-btn" onclick="${backAction}">${d.back}</button>
+    </div>
+    <h3>${title}</h3>
+    <p class="modal-sub">${files.length} files</p>`;
+
+  if(!files.length){
+    html += `<p class="muted">${d.empty}</p>`;
+  } else if(isBlockCategory(catKey)){
+    /* ★ 실례별 그룹 렌더링 (가로 배치) */
+    const groups = BLOCK_GROUPS[catKey] || [];
+    groups.forEach(group=>{
+      html += `<div class="example-group">`;
+      html += `<div class="example-header">${resolveLabel(group.label)}</div>`;
+      html += `<div class="block-gallery">`;
+      group.files.forEach(file=>{
+        const url = BASE + file;
+        const ext = file.split(".").pop().toLowerCase();
+        let mediaHtml = "";
+        if(["mp4","mov","webm"].includes(ext)){
+          mediaHtml = `<video src="${url}" controls preload="metadata" playsinline></video>`;
+        } else {
+          mediaHtml = `<img src="${url}" alt="${file}" loading="lazy" draggable="false"
+            ondblclick="openFullscreenFromGroup('${catKey}', '${file}')">`;
+        }
+        html += `<div class="block-item"><div class="block-media">${mediaHtml}</div></div>`;
+      });
+      html += `</div></div>`;
+    });
+  } else {
+    html += `<div class="gallery">`;
+    files.forEach((f, idx)=>{
+      const url = BASE + f;
+      const ext = f.split(".").pop().toLowerCase();
+      if(["mp4","mov","webm"].includes(ext)){
+        html += `<div class="item">
+          <video src="${url}" controls preload="metadata" playsinline></video>
+        </div>`;
+      } else {
+        html += `<div class="item"
+          ondblclick="openFullscreen('${catKey}', ${idx})"
+          data-cat="${catKey}" data-idx="${idx}">
+          <img src="${url}" alt="${f}" loading="lazy" draggable="false">
+          <span class="zoom-hint">${d.zoomHint}</span>
+        </div>`;
+      }
+    });
+    html += `</div>`;
+  }
+  openModal(html);
+}
+
+/* fullscreen */
+let fsState = { files:[], index:0 };
+
+function openFullscreen(catKey, idx){
+  const imgs = (A[catKey]||[]).filter(f=>{
+    const ext = f.split(".").pop().toLowerCase();
+    return ["jpg","jpeg","png","gif","webp","bmp"].includes(ext);
+  });
+  if(!imgs.length) return;
+  const original = A[catKey][idx];
+  const i = imgs.indexOf(original);
+  fsState = { files: imgs, index: i >= 0 ? i : 0 };
+  renderFullscreen();
+  document.getElementById("fsViewer").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function openFullscreenFromGroup(catKey, fileName){
+  const groups = BLOCK_GROUPS[catKey] || [];
+  const allImgs = [];
+  groups.forEach(g=>{
+    g.files.forEach(f=>{
+      const ext = f.split(".").pop().toLowerCase();
+      if(["jpg","jpeg","png","gif","webp","bmp"].includes(ext)) allImgs.push(f);
+    });
+  });
+  const i = allImgs.indexOf(fileName);
+  fsState = { files: allImgs, index: i >= 0 ? i : 0 };
+  renderFullscreen();
+  document.getElementById("fsViewer").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function renderFullscreen(){
+  const d = I18N[currentLang];
+  const f = fsState.files[fsState.index];
+  document.getElementById("fsImg").src = BASE + f;
+  document.getElementById("fsCounter").textContent =
+    (fsState.index+1) + d.fsCounter + fsState.files.length;
+  const show = fsState.files.length > 1;
+  document.querySelector(".fs-prev").style.display = show ? "flex" : "none";
+  document.querySelector(".fs-next").style.display = show ? "flex" : "none";
+}
+
+function closeFullscreen(){
+  document.getElementById("fsViewer").classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function fsPrev(e){ e.stopPropagation();
+  fsState.index = (fsState.index - 1 + fsState.files.length) % fsState.files.length;
+  renderFullscreen();
+}
+function fsNext(e){ e.stopPropagation();
+  fsState.index = (fsState.index + 1) % fsState.files.length;
+  renderFullscreen();
+}
+
+document.addEventListener("keydown", e=>{
+  if(document.getElementById("fsViewer").classList.contains("open")){
+    if(e.key==="Escape") closeFullscreen();
+    if(e.key==="ArrowLeft") fsPrev(e);
+    if(e.key==="ArrowRight") fsNext(e);
+  } else if(e.key==="Escape"){
+    closeModal();
+  }
+});
+
+(function(){
+  let sx=0, sy=0;
+  const el = document.getElementById("fsViewer");
+  el.addEventListener("touchstart", e=>{
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, {passive:true});
+  el.addEventListener("touchend", e=>{
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)){
+      if(dx < 0) fsNext(e); else fsPrev(e);
+    }
+  }, {passive:true});
+})();
+
+window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
